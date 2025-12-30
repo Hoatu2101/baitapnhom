@@ -1,0 +1,25 @@
+/* Đổi màu header admin */
+#header {
+    background-color: #4CAF50; /* xanh lá */
+    color: white;
+}
+
+/* Bảng danh sách user đẹp hơn */
+.model-user table {
+    border-collapse: collapse;
+}
+
+.model-user th, .model-user td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Hover highlight */
+.model-user tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Thêm padding cho action bar */
+#changelist-form {
+    padding: 15px;
+}
