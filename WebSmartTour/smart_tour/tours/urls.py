@@ -11,6 +11,8 @@ router.register('booking-tours', views.BookingTourView, basename='booking-tour')
 router.register('booking-hotels', views.BookingHotelView, basename='booking-hotel')
 router.register('booking-transports', views.BookingTransportView, basename='booking-transport')
 router.register('invoices', views.InvoiceView, basename='invoice')
+router.register('reviews', views.ReviewView, basename='review')
+
 
 urlpatterns = [
     path('', include(router.urls))

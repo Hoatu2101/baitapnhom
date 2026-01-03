@@ -3,7 +3,7 @@ from rest_framework.exceptions import ValidationError
 from .models import (
     User, Role, Service,
     Booking, BookingTour, BookingHotel, BookingTransport,
-    Invoice
+    Invoice, Review
 )
 
 # ================= ROLE =================
@@ -124,4 +124,15 @@ class InvoiceSerializer(serializers.ModelSerializer):
             'booking',
             'payment_date',
             'total_amount'
+        ]
+
+class ReviewSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Review
+        fields = [
+            'id', 'user', 'service',
+            'rating', 'comment',
+            'created_date'
         ]

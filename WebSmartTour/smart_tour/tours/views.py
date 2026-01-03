@@ -6,13 +6,14 @@ from . import models
 from .models import (
     User, Role, Service,
     Booking, BookingTour, BookingHotel, BookingTransport,
-    Invoice
+    Invoice, Review
 )
+from .perms import IsProvider, IsCustomer
 from .serializers import (
     UserSerializer, RoleSerializer, ServiceSerializer,
     BookingSerializer, BookingTourSerializer,
     BookingHotelSerializer, BookingTransportSerializer,
-    InvoiceSerializer
+    InvoiceSerializer, ReviewSerializer
 )
 
 
@@ -47,7 +48,8 @@ class UserView(viewsets.ViewSet, generics.CreateAPIView):
 class ServiceView(viewsets.ModelViewSet):
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer
-    permission_classes = [permissions.AllowAny]
+    # permission_classes = [permissions.AllowAny]
+    permission_classes = [IsProvider]
 
 
 # ================= BOOKING =================
@@ -96,3 +98,17 @@ class InvoiceView(viewsets.ReadOnlyModelViewSet):
     def revenue_report(self, request):
         total = Invoice.objects.aggregate(total=models.Sum('total_amount'))
         return Response(total)
+
+class ReviewView(viewsets.ModelViewSet):
+    serializer_class = ReviewSerializer
+    permission_classes = [IsCustomer]
+
+    def get_queryset(self):
+        service_id = self.request.query_params.get('service_id')
+        qs = Review.objects.all()
+        if service_id:
+            qs = qs.filter(service_id=service_id)
+        return qs
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

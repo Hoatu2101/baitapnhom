@@ -24,9 +24,12 @@ class User(AbstractUser):
     avatar = CloudinaryField(null=True)
     role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, blank=True)
     email = models.EmailField()
+
+    is_verified = models.BooleanField(default=False)  # duyệt nhà cung cấp
+
     def __str__(self):
         return self.username
-# id_service tự động là id mặc định của Django
+
 
 # thông tin dịch vụ
 class Service(BaseModel):
@@ -52,6 +55,38 @@ class Service(BaseModel):
 
     def __str__(self):
         return self.name
+
+class Review(BaseModel):
+    RATING_CHOICES = (
+        (1, '⭐'),
+        (2, '⭐⭐'),
+        (3, '⭐⭐⭐'),
+        (4, '⭐⭐⭐⭐'),
+        (5, '⭐⭐⭐⭐⭐'),
+    )
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='reviews'
+    )
+
+    service = models.ForeignKey(
+        Service,
+        on_delete=models.CASCADE,
+        related_name='reviews'
+    )
+
+    rating = models.IntegerField(choices=RATING_CHOICES)
+    comment = models.TextField()
+
+    class Meta:
+        unique_together = ('user', 'service')
+        ordering = ['-created_date']
+
+    def __str__(self):
+        return f"{self.service.name} - {self.rating}⭐ by {self.user.username}"
+
 
 
 class Booking(BaseModel):
