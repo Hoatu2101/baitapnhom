@@ -93,6 +93,7 @@ class Booking(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
     booking_date = models.DateTimeField()
+    description = RichTextUploadingField(null=True, blank=True)
 
     def __str__(self):
         return f"Booking {self.id} by {self.user}"

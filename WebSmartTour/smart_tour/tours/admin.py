@@ -3,6 +3,7 @@ from ckeditor_uploader.widgets import CKEditorUploadingWidget
 from django.contrib import admin
 from django.db.models import Sum, Count
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
+from rest_framework.exceptions import ValidationError
 
 from . import models
 from .models import User, Role, Service, Booking, BookingTour, BookingHotel, BookingTransport, Invoice, Review
@@ -18,16 +19,12 @@ class RoleAdmin(admin.ModelAdmin):
 class UserAdmin(DjangoUserAdmin):
     model = User
 
-    # 1. Hiển thị ở danh sách bên ngoài
     list_display = ('username', 'email', 'role', 'is_verified', 'is_staff', 'is_active')
 
-    # 2. Các bộ lọc nhanh bên phải
     list_filter = ('role', 'is_verified', 'is_staff', 'is_active')
 
-    # 3. Ô tìm kiếm
     search_fields = ('username', 'email')
 
-    # 4. THIẾT KẾ LẠI FORM CHI TIẾT (Giống ảnh bạn gửi)
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
 
@@ -54,7 +51,6 @@ class UserAdmin(DjangoUserAdmin):
         }),
     )
 
-    # 5. Giúp chọn nhóm quyền (Groups) dễ dàng hơn bằng 2 cột (như trong ảnh)
     filter_horizontal = ('groups', 'user_permissions')
 
 class ServiceAdminForm(forms.ModelForm):
@@ -106,7 +102,7 @@ class ServiceAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         if not change:
             if not request.user.is_verified:
-                raise PermissionError("Nhà cung cấp chưa được duyệt")
+                raise ValidationError("Nhà cung cấp chưa được duyệt")
             obj.provider = request.user
         super().save_model(request, obj, form, change)
 

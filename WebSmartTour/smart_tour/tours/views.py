@@ -1,5 +1,6 @@
 from rest_framework import viewsets, generics, permissions, status, parsers
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from . import models
@@ -46,10 +47,18 @@ class UserView(viewsets.ViewSet, generics.CreateAPIView):
 
 # ================= SERVICE =================
 class ServiceView(viewsets.ModelViewSet):
-    queryset = Service.objects.all()
     serializer_class = ServiceSerializer
-    # permission_classes = [permissions.AllowAny]
     permission_classes = [IsProvider]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff:
+            return Service.objects.all()
+        return Service.objects.filter(provider=user)
+
+    def perform_create(self, serializer):
+        serializer.save(provider=self.request.user)
+
 
 
 # ================= BOOKING =================
@@ -64,6 +73,13 @@ class BookingView(viewsets.ModelViewSet):
         return Booking.objects.filter(user=user)
 
     def perform_create(self, serializer):
+        service = serializer.validated_data['service']
+        if service.available_slots <= 0:
+            raise ValidationError("Dịch vụ đã hết chỗ")
+
+        service.available_slots -= 1
+        service.save()
+
         serializer.save(user=self.request.user)
 
 
@@ -104,10 +120,15 @@ class ReviewView(viewsets.ModelViewSet):
     permission_classes = [IsCustomer]
 
     def get_queryset(self):
-        service_id = self.request.query_params.get('service_id')
         qs = Review.objects.all()
+        service_id = self.request.query_params.get('service_id')
         if service_id:
             qs = qs.filter(service_id=service_id)
+
+        user = self.request.user
+        if user.role and user.role.name == 'PROVIDER':
+            qs = qs.filter(service__provider=user)
+
         return qs
 
     def perform_create(self, serializer):
