@@ -1,3 +1,4 @@
+from django.contrib.auth.forms import UserCreationForm
 from rest_framework import viewsets, generics, permissions, status, parsers
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -15,7 +16,9 @@ from .serializers import (
     BookingHotelSerializer, BookingTransportSerializer,
     InvoiceSerializer, ReviewSerializer
 )
-
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .form import SupplierRegisterForm
 
 # ================= ROLE =================
 class RoleView(viewsets.ReadOnlyModelViewSet):
@@ -112,3 +115,29 @@ class ReviewView(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+
+def register_supplier(request):
+    class Meta(UserCreationForm.Meta):
+        model = User
+        fields = ('username', 'email', 'avatar')
+
+        # --- CHÈN ĐOẠN NÀY VÀO ĐÂY MỚI ĐÚNG ---
+        error_messages = {
+            'username': {
+                'unique': "Tên đăng nhập này đã có người dùng. Vui lòng chọn tên khác nhé!",
+            },
+        }
+    if request.method == 'POST':
+        form = SupplierRegisterForm(request.POST, request.FILES)
+        if form.is_valid():
+            user = form.save()
+            messages.success(request, "Đăng ký thành công! Vui lòng chờ Admin duyệt tài khoản.")
+            return redirect('login')
+    else:
+        form = SupplierRegisterForm()
+
+    return render(request, 'registration/register_supplier.html', {'form': form})
+def intro_supplier(request):
+    return render(request, 'intro_supplier.html')

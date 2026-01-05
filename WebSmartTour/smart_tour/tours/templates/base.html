@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Tour System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        header {
+            background-color: #ffffff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 15px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0984e3;
+            text-decoration: none;
+        }
+
+        nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+
+        nav ul li {
+            margin-left: 30px;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: #2d3436;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav ul li a:hover {
+            color: #0984e3;
+        }
+
+        /* Nơi nội dung các trang con sẽ chui vào */
+        .content-wrapper {
+            min-height: 80vh;
+        }
+        footer {
+            background-color: #2d3436;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="/" class="logo">✈️ SmartTour</a>
+        <nav>
+            <ul>
+                <li><a href="/">Trang chủ</a></li>
+                <li><a href="{% url 'intro_supplier' %}">Hợp tác</a></li>
+                <li><a href="{% url 'register_supplier' %}">Đăng ký NCC</a></li>
+                <li><a href="{% url 'admin:login' %}">Đăng nhập</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="content-wrapper">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <footer>
+        <p>&copy; 2026 SmartTour System. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

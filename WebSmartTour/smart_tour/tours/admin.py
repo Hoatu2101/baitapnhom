@@ -219,17 +219,6 @@ class MyAdminSite(admin.AdminSite):
     def login(self, request, extra_context=None):
             # Override login để thêm context hoặc xử lý nếu cần
             return super().login(request, extra_context=extra_context)
-    def each_context(self, request):
-        context = super().each_context(request)
-
-        # Kiểm tra role
-        if hasattr(request.user, 'role') and request.user.role:
-            if request.user.role.name == 'Nhà cung cấp':
-                context['index_title'] = "Chào mừng - nhà cung cấp"
-            else:
-                context['index_title'] = "Trang quản trị Smart Tour"
-        return context
-
 
 # --- Khởi tạo site ---
 admin_site = MyAdminSite(name='myadmin')

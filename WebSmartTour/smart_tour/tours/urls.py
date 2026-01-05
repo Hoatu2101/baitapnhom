@@ -15,5 +15,7 @@ router.register('reviews', views.ReviewView, basename='review')
 
 
 urlpatterns = [
-    path('', include(router.urls))
+    path('api', include(router.urls)),
+    path('register_supplier/', views.register_supplier, name='register_supplier'),
+    path('', views.intro_supplier, name='intro_supplier'),
 ]
