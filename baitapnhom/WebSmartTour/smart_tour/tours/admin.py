@@ -5,7 +5,7 @@ from django.db.models import Sum, Count, Avg
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 from rest_framework.exceptions import ValidationError
 from . import models
-from .models import User, Role, Service, Booking, BookingTour, BookingHotel, BookingTransport, Invoice, Review
+from .models import User, Role, Service, Booking, BookingTour, BookingHotel, BookingTransport, Invoice, Review, Payment
 
 
 # --- Role ---
@@ -15,42 +15,48 @@ class RoleAdmin(admin.ModelAdmin):
 
 
 # --- User ---
+# class UserAdmin(DjangoUserAdmin):
+#     model = User
+#
+#     list_display = ('username', 'email', 'role', 'is_verified', 'is_staff', 'is_active')
+#
+#     list_filter = ('role', 'is_verified', 'is_staff', 'is_active')
+#
+#     search_fields = ('username', 'email')
+#
+#     fieldsets = (
+#         (None, {'fields': ('username', 'password')}),
+#
+#         ('Personal info', {
+#             'fields': ('first_name', 'last_name', 'email', 'avatar')
+#         }),
+#
+#         ('Permissions', {
+#             'fields': (
+#                 'is_active',
+#                 'is_staff',
+#                 'is_superuser',
+#                 'groups',
+#                 'user_permissions'
+#             ),
+#         }),
+#
+#         ('Verify & Role', {
+#             'fields': ('role', 'is_verified'),
+#         }),
+#
+#         ('Important dates', {
+#             'fields': ('last_login', 'date_joined')
+#         }),
+#     )
+#
+#     filter_horizontal = ('groups', 'user_permissions')
+
 class UserAdmin(DjangoUserAdmin):
-    model = User
-
-    list_display = ('username', 'email', 'role', 'is_verified', 'is_staff', 'is_active')
-
-    list_filter = ('role', 'is_verified', 'is_staff', 'is_active')
-
+    list_display = ('username', 'email', 'role', 'is_verified', 'is_staff')
+    list_filter = ('role', 'is_verified', 'is_staff')
     search_fields = ('username', 'email')
-
-    fieldsets = (
-        (None, {'fields': ('username', 'password')}),
-
-        ('Personal info', {
-            'fields': ('first_name', 'last_name', 'email', 'avatar')
-        }),
-
-        ('Permissions', {
-            'fields': (
-                'is_active',
-                'is_staff',
-                'is_superuser',
-                'groups',
-                'user_permissions'
-            ),
-        }),
-
-        ('Verify & Role', {
-            'fields': ('role', 'is_verified'),
-        }),
-
-        ('Important dates', {
-            'fields': ('last_login', 'date_joined')
-        }),
-    )
-
-    filter_horizontal = ('groups', 'user_permissions')
+    readonly_fields = ('last_login', 'date_joined')
 
 class ServiceAdminForm(forms.ModelForm):
     description = forms.CharField(widget=CKEditorUploadingWidget())
@@ -159,17 +165,9 @@ class BookingTransportInline(admin.StackedInline):
 
 # --- Booking ---
 class BookingAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'service', 'booking_date', 'active', 'created_date')
-    list_filter = ('service', 'active', 'booking_date')
-    search_fields = ('user__username', 'service__name')
-    inlines = [BookingTourInline, BookingHotelInline, BookingTransportInline]
-
-    def short_description(self, obj):
-        if obj.description:
-            return obj.description[:50] + "..." if len(obj.description) > 50 else obj.description
-        return "-"
-
-    short_description.short_description = "Mô tả"
+    list_display = ('id', 'user', 'service', 'booking_date', 'active')
+    list_filter = ('active',)
+    search_fields = ('user__username',)
 
 # --- Invoice ---
 class InvoiceAdmin(admin.ModelAdmin):
@@ -225,4 +223,5 @@ admin_site.register(Service, ServiceAdmin)
 admin_site.register(Booking, BookingAdmin)
 admin_site.register(Invoice, InvoiceAdmin)
 admin_site.register(Review, ReviewAdmin)
+admin_site.register(Payment)
 

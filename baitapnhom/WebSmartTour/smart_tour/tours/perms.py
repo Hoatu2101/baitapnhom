@@ -8,18 +8,13 @@ class IsAuthenticatedUser(BasePermission):
 
 class IsAdmin(BasePermission):
     def has_permission(self, request, view):
-        return bool(
-            request.user and
-            request.user.is_authenticated and
-            request.user.is_staff
-        )
+        return request.user.is_authenticated and request.user.is_staff
 
 
 class IsProvider(BasePermission):
     def has_permission(self, request, view):
         user = request.user
-        return bool(
-            user and
+        return (
             user.is_authenticated and
             user.role and
             user.role.name == 'PROVIDER' and
@@ -30,13 +25,11 @@ class IsProvider(BasePermission):
 class IsCustomer(BasePermission):
     def has_permission(self, request, view):
         user = request.user
-        return bool(
-            user and
+        return (
             user.is_authenticated and
             user.role and
             user.role.name == 'CUSTOMER'
         )
-
 
 class IsOwner(BasePermission):
     def has_object_permission(self, request, view, obj):
