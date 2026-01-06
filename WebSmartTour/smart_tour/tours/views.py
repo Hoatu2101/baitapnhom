@@ -123,7 +123,6 @@ def register_supplier(request):
         model = User
         fields = ('username', 'email', 'avatar')
 
-        # --- CHÈN ĐOẠN NÀY VÀO ĐÂY MỚI ĐÚNG ---
         error_messages = {
             'username': {
                 'unique': "Tên đăng nhập này đã có người dùng. Vui lòng chọn tên khác nhé!",

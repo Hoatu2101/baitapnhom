@@ -41,18 +41,63 @@ INSTALLED_APPS = [
 ]
 JAZZMIN_SETTINGS = {
 
-    "site_title": "Xin chào Admin",
+    "site_title": "Travel Admin System",
+    "site_header": "Hệ thống Quản lý Tours",
+    "site_brand": "Travel Services",
+    "welcome_sign": "Chào mừng !",
+    "copyright": "Travel Company Ltd",
+    "search_model": ["auth.User", "tours.Service"],
+    "user_avatar": "get_avatar_url",
+    # --- Menu ---
+    "topmenu_links": [
+        {"name": "Trang chủ", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"model": "tours.Service"},
+        {"model": "tours.Booking"},
+    ],
 
 
-    "site_header": "Xin chào",
+    "order_with_respect_to": [
+        "tours.Invoice",
+        "tours.Booking",
+        "tours.Service",
+        "tours.Review",
+        "tours.User",
+        "tours.Role",
+    ],
 
 
-    "site_brand": "Xin chào",
+    "icons": {
+        "auth": "fas fa-users-cog",
+
+        "tours.User": "fas fa-user-circle",
+        "tours.Role": "fas fa-user-tag",
+
+        "tours.Service": "fas fa-globe-asia",
+
+        "tours.Booking": "fas fa-clipboard-list",
+        "tours.BookingTour": "fas fa-suitcase-rolling",
+        "tours.BookingHotel": "fas fa-hotel",
+        "tours.BookingTransport": "fas fa-shuttle-van",
+
+        # Review & Invoice
+        "tours.Review": "fas fa-star",
+        "tours.Invoice": "fas fa-file-invoice-dollar",
+    },
+
+    "default_icon_parents": "fas fa-compass",
+    "default_icon_children": "fas fa-map-marker-alt",
+
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "changeform_format": "horizontal_tabs",
+}
 
 
-    "welcome_sign": "Chào mừng bạn quay lại!",
-
-
+JAZZMIN_UI_TWEAKS = {
+    "theme": "cerulean",
+    "theme": "flatly",
+    "navbar": "navbar-primary navbar-dark",
+    "sidebar": "sidebar-light-primary",
 }
 
 AUTH_USER_MODEL = 'tours.User'
@@ -146,14 +191,14 @@ REST_FRAMEWORK = {
 }
 
 cloudinary.config(
-    cloud_name="dxxwcby8l",
-    api_key="792844686918347",
-    api_secret="T8ys_Z9zaKSqmKWa4K1RY6DXUJg"
+    cloud_name="dlvwfou7y",
+    api_key="539475968685867",
+    api_secret="fxQr19ONES9YnIRQmI0FdC0wD5c"
 )
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-CLIENT_ID = 'kOditntahpflHNyaUMLSstRc5KkmZHhN2P0wXf9T'
-CLIENT_SECRET = 'Ce79BktaI5NHf4YTf7jmzeARPSSrwA6qFPoTI714R4rWaGmzHvIrGD5pTNy83ZYNAzg11afpRWttldOA8npUQklkC6LhLn9sDVMyZ6N2HCVYBYsGY44RHzyDFOsELvHC'
+CLIENT_ID = 'ZlVy3clJj8ruazS8Ysl073V67BsPPZ9SUAqWabfd'
+CLIENT_SECRET = 'UoAxy8sPjUJm9lVal9fVp9Bvum2fO5GwXlfIGpoeBUnDSLqQU4GMwCNrppFwJPsJwUMqu1N8CGCk6YNTXzCBBIHS0r7N4JhgZxSy7SS6LWH8EVnodcQ7Nz5PBrYWApw0'

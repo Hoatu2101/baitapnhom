@@ -29,7 +29,15 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
+    @property
+    def get_avatar_url(self):
+        if self.avatar:
+            return self.avatar.url
 
+        return None
+
+    def __str__(self):
+        return self.username
 
 # thông tin dịch vụ
 class Service(BaseModel):
