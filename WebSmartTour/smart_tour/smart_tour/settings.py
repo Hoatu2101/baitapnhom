@@ -39,6 +39,24 @@ INSTALLED_APPS = [
     'drf_yasg',
     'oauth2_provider',
 ]
+INSTALLED_APPS = [
+        'jazzmin',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+
+    'tours.apps.ToursConfig',
+
+    'ckeditor',
+    'ckeditor_uploader',
+    'rest_framework',
+    'drf_yasg',
+    'oauth2_provider',
+
+]
 JAZZMIN_SETTINGS = {
 
     "site_title": "Travel Admin System",
@@ -99,7 +117,6 @@ JAZZMIN_UI_TWEAKS = {
     "navbar": "navbar-primary navbar-dark",
     "sidebar": "sidebar-light-primary",
 }
-
 AUTH_USER_MODEL = 'tours.User'
 
 
@@ -121,7 +138,7 @@ WSGI_APPLICATION = 'smart_tour.wsgi.application'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # 👈 override admin/login.html
+        'DIRS': [BASE_DIR / 'templates'],  # override admin/login.html
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -188,7 +205,17 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
     ),
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '50/hour',
+        'user': '1000/hour',
+        'provider': '300/hour',
+    }
 }
+
 
 cloudinary.config(
     cloud_name="dlvwfou7y",
@@ -200,5 +227,5 @@ cloudinary.config(
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-CLIENT_ID = 'ZlVy3clJj8ruazS8Ysl073V67BsPPZ9SUAqWabfd'
-CLIENT_SECRET = 'UoAxy8sPjUJm9lVal9fVp9Bvum2fO5GwXlfIGpoeBUnDSLqQU4GMwCNrppFwJPsJwUMqu1N8CGCk6YNTXzCBBIHS0r7N4JhgZxSy7SS6LWH8EVnodcQ7Nz5PBrYWApw0'
+CLIENT_ID = 'kOditntahpflHNyaUMLSstRc5KkmZHhN2P0wXf9T'
+CLIENT_SECRET = 'Ce79BktaI5NHf4YTf7jmzeARPSSrwA6qFPoTI714R4rWaGmzHvIrGD5pTNy83ZYNAzg11afpRWttldOA8npUQklkC6LhLn9sDVMyZ6N2HCVYBYsGY44RHzyDFOsELvHC'

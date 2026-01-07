@@ -3,7 +3,7 @@ from rest_framework.exceptions import ValidationError
 from .models import (
     User, Role, Service,
     Booking, BookingTour, BookingHotel, BookingTransport,
-    Invoice, Review
+    Invoice, Review, Payment
 )
 
 # ================= ROLE =================
@@ -51,23 +51,30 @@ class UserSerializer(serializers.ModelSerializer):
 
 # ================= SERVICE =================
 class ServiceSerializer(serializers.ModelSerializer):
+    provider = serializers.StringRelatedField(read_only=True)
+
     class Meta:
         model = Service
-        fields = ['id', 'name']
+        fields = '__all__'
+        read_only_fields = ('provider', 'created_date', 'updated_date')
+
 
 
 # ================= BOOKING =================
 class BookingSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
-    service = ServiceSerializer()
+    service = ServiceSerializer(read_only=True)
+    service_id = serializers.PrimaryKeyRelatedField(
+        queryset=Service.objects.all(),
+        write_only=True,
+        source='service'
+    )
 
     class Meta:
         model = Booking
-        fields = [
-            'id', 'user', 'service',
-            'booking_date', 'active',
-            'created_date'
-        ]
+        fields = '__all__'
+        read_only_fields = ('user', 'created_date')
+
 
 
 # ================= BOOKING TOUR =================
@@ -126,13 +133,51 @@ class InvoiceSerializer(serializers.ModelSerializer):
             'total_amount'
         ]
 
+
 class ReviewSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
+    service_id = serializers.PrimaryKeyRelatedField(
+        queryset=Service.objects.all(),
+        write_only=True,
+        source='service'
+    )
 
     class Meta:
         model = Review
-        fields = [
-            'id', 'user', 'service',
-            'rating', 'comment',
-            'created_date'
-        ]
+        fields = '__all__'
+        read_only_fields = ('user', 'created_date')
+
+    def validate(self, data):
+        user = self.context['request'].user
+        service = data['service']
+        if Review.objects.filter(user=user, service=service).exists():
+            raise ValidationError("Đã đánh giá rồi")
+        if not Booking.objects.filter(user=user, service=service).exists():
+            raise ValidationError("Bạn chưa sử dụng dịch vụ này")
+        return data
+
+
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = '__all__'
+        read_only_fields = ('is_paid', 'transaction_id')
+
+
+class ProviderServiceReportSerializer(serializers.Serializer):
+    service_id = serializers.IntegerField()
+    service_name = serializers.CharField()
+    total_bookings = serializers.IntegerField()
+    total_revenue = serializers.DecimalField(max_digits=12, decimal_places=2)
+
+
+class TimeReportSerializer(serializers.Serializer):
+    period = serializers.CharField()   # month / quarter / year
+    total_bookings = serializers.IntegerField()
+    total_revenue = serializers.DecimalField(max_digits=12, decimal_places=2)
+
+
+class AdminSummarySerializer(serializers.Serializer):
+    total_services = serializers.IntegerField()
+    total_bookings = serializers.IntegerField()
+    total_revenue = serializers.DecimalField(max_digits=12, decimal_places=2)
