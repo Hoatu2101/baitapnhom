@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký Đối tác | Travel App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        /* --- PHẦN GIAO DIỆN (CSS) --- */
+        body {
+            /* Hình nền chủ đề du lịch */
+            background-image: url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=2021&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+        }
+
+        .register-container {
+            background: rgba(255, 255, 255, 0.9); /* Hiệu ứng kính */
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .register-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2c3e50;
+        }
+
+        .register-header h2 {
+            margin: 10px 0;
+            font-size: 24px;
+        }
+
+        .register-header i {
+            font-size: 50px;
+            color: #0984e3; /* Màu xanh du lịch */
+        }
+
+        /* Style cho Form Django */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #34495e;
+        }
+
+        /* Can thiệp vào input của Django */
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box; /* Quan trọng để không bị vỡ layout */
+            font-size: 14px;
+            transition: border 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: #0984e3;
+            outline: none;
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 5px;
+            display: block;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(to right, #0984e3, #00cec9);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-top: 10px;
+        }
+
+        button[type="submit"]:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(9, 132, 227, 0.3);
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        .login-link a {
+            color: #0984e3;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        ul.errorlist {
+            color: red;
+            list-style: none;
+            padding: 0;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="register-container">
+        <div class="register-header">
+            <i class="fas fa-handshake"></i>
+            <h2>Đăng ký Đối Tác</h2>
+            <p>Tham gia mạng lưới cung cấp dịch vụ du lịch</p>
+        </div>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+
+                    {{ field }} {% if field.errors %}
+                        <ul class="errorlist">
+                            {% for error in field.errors %}
+                                <li><i class="fas fa-exclamation-circle"></i> {{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+
+                    {% if field.help_text %}
+                        <span class="help-text">{{ field.help_text|safe }}</span>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <button type="submit">Gửi hồ sơ đăng ký</button>
+        </form>
+
+        <div class="login-link">
+    Đã có tài khoản? <a href="{% url 'admin:login' %}">Đăng nhập ngay</a>
+</div>
+    </div>
+
+</body>
+</html>

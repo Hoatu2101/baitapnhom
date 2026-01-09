@@ -1,0 +1,40 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block content %}
+  {{ block.super }}
+
+  <h2>Thống kê doanh thu và số lượng booking</h2>
+  <canvas id="chart"></canvas>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const ctx = document.getElementById('chart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: {{ chart_labels|safe }},
+        datasets: [
+          {
+            label: 'Số lượng booking',
+            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+            data: {{ chart_booking_counts|safe }}
+          },
+          {
+            label: 'Doanh thu',
+            backgroundColor: 'rgba(255, 99, 132, 0.7)',
+            data: {{ chart_revenues|safe }}
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  </script>
+{% endblock %}
