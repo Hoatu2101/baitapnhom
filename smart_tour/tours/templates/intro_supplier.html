@@ -1,0 +1,205 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .partner-page {
+        font-family: 'Segoe UI', sans-serif;
+        color: #2d3436;
+    }
+
+
+    .partner-hero {
+        background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=2074&auto=format&fit=crop');
+        background-size: cover;
+        background-position: center;
+        height: 70vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: white;
+    }
+
+    .hero-box h1 {
+        font-size: 3.5rem;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .hero-box p {
+        font-size: 1.3rem;
+        margin-bottom: 30px;
+        color: #dfe6e9;
+    }
+
+    .btn-register-now {
+        background: #00b894; /* Màu xanh lá tạo cảm giác "lợi nhuận" */
+        color: white;
+        padding: 15px 40px;
+        font-size: 18px;
+        font-weight: bold;
+        text-decoration: none;
+        border-radius: 50px;
+        box-shadow: 0 5px 15px rgba(0, 184, 148, 0.4);
+        transition: 0.3s;
+    }
+
+    .btn-register-now:hover {
+        background: #55efc4;
+        transform: translateY(-5px);
+        color: #2d3436;
+    }
+
+    /* 2. LỢI ÍCH (BENEFITS) */
+    .benefits-section {
+        padding: 80px 20px;
+        text-align: center;
+    }
+
+    .benefits-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 40px;
+        max-width: 1200px;
+        margin: 50px auto 0;
+    }
+
+    .benefit-item {
+        padding: 30px;
+        border: 1px solid #eee;
+        border-radius: 10px;
+        transition: 0.3s;
+    }
+
+    .benefit-item:hover {
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        border-color: #0984e3;
+    }
+
+    .benefit-icon {
+        font-size: 60px;
+        color: #0984e3;
+        margin-bottom: 20px;
+    }
+
+    /* 3. QUY TRÌNH 3 BƯỚC */
+    .steps-section {
+        background: #f1f2f6;
+        padding: 80px 20px;
+        text-align: center;
+    }
+
+    .step-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        max-width: 1000px;
+        margin: 50px auto;
+    }
+
+    .step-box {
+        background: white;
+        width: 250px;
+        padding: 30px;
+        border-radius: 15px;
+        position: relative;
+        margin: 10px;
+    }
+
+    .step-number {
+        background: #0984e3;
+        color: white;
+        width: 40px;
+        height: 40px;
+        line-height: 40px;
+        border-radius: 50%;
+        font-weight: bold;
+        margin: 0 auto 15px;
+        font-size: 20px;
+    }
+
+    /* Mũi tên chỉ hướng (chỉ hiện trên màn hình to) */
+    .arrow-next {
+        font-size: 30px;
+        color: #b2bec3;
+        margin: 0 20px;
+    }
+
+    @media (max-width: 768px) {
+        .arrow-next { display: none; }
+    }
+</style>
+
+<div class="partner-page">
+
+    <div class="partner-hero">
+        <div class="hero-box">
+            <h1>Hợp tác cùng SmartTour</h1>
+            <p>Tiếp cận hàng triệu khách hàng và bùng nổ doanh số ngay hôm nay</p>
+            <a href="{% url 'register_supplier' %}" class="btn-register-now">
+                <i class="fas fa-rocket"></i> Đăng Ký Đối Tác Ngay
+            </a>
+        </div>
+    </div>
+
+    <div class="benefits-section">
+        <h2 style="font-size: 2.5rem; color:#2d3436;">Tại Sao Chọn Chúng Tôi?</h2>
+        <p style="color:#636e72;">Nền tảng công nghệ hỗ trợ toàn diện cho doanh nghiệp lữ hành</p>
+
+        <div class="benefits-grid">
+            <div class="benefit-item">
+                <i class="fas fa-chart-line benefit-icon"></i>
+                <h3>Tăng Trưởng Doanh Thu</h3>
+                <p>Mở rộng kênh bán hàng online, tiếp cận khách hàng tiềm năng 24/7 mà không tốn chi phí quảng cáo.</p>
+            </div>
+            <div class="benefit-item">
+                <i class="fas fa-laptop-code benefit-icon"></i>
+                <h3>Hệ Thống Quản Lý</h3>
+                <p>Cung cấp Dashboard quản lý tour, đơn hàng và doanh thu chuyên nghiệp, trực quan.</p>
+            </div>
+            <div class="benefit-item">
+                <i class="fas fa-headset benefit-icon"></i>
+                <h3>Hỗ Trợ 24/7</h3>
+                <p>Đội ngũ SmartTour luôn đồng hành hỗ trợ đối tác giải quyết vấn đề nhanh chóng.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="steps-section">
+        <h2 style="font-size: 2.5rem;">Quy Trình Hợp Tác Dễ Dàng</h2>
+
+        <div class="step-container">
+            <div class="step-box">
+                <div class="step-number">1</div>
+                <h4>Đăng Ký</h4>
+                <p>Điền thông tin doanh nghiệp và gửi hồ sơ xét duyệt.</p>
+            </div>
+
+            <i class="fas fa-chevron-right arrow-next"></i>
+
+            <div class="step-box">
+                <div class="step-number">2</div>
+                <h4>Đăng Tải Tour</h4>
+                <p>Đăng thông tin tour, hình ảnh và giá cả lên hệ thống.</p>
+            </div>
+
+            <i class="fas fa-chevron-right arrow-next"></i>
+
+            <div class="step-box">
+                <div class="step-number">3</div>
+                <h4>Nhận Booking</h4>
+                <p>Khách đặt tour, bạn nhận thông báo và đón khách.</p>
+            </div>
+        </div>
+
+        <a href="{% url 'register_supplier' %}" class="btn-register-now" style="background:#0984e3;">
+            Tham Gia Ngay
+        </a>
+    </div>
+
+</div>
+{% endblock %}

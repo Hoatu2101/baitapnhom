@@ -1,0 +1,98 @@
+/* Reset nhẹ */
+body.login {
+    background: linear-gradient(135deg, #1e88e5, #26c6da);
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+/* Khung login */
+.login #container {
+    background: transparent;
+    border: none;
+}
+
+/* Card đăng nhập */
+.login #content {
+    background: #ffffff;
+    max-width: 380px;
+    margin: 80px auto;
+    padding: 30px 35px;
+    border-radius: 14px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+}
+
+/* Tiêu đề Django admin */
+.login h1 {
+    text-align: center;
+    font-size: 26px;
+    margin-bottom: 10px;
+    color: #1e88e5;
+    font-weight: 700;
+}
+
+/* Text dưới tiêu đề */
+.login h1::after {
+    content: "Smart Tour – Quản trị du lịch";
+    display: block;
+    font-size: 13px;
+    color: #666;
+    margin-top: 6px;
+    font-weight: 400;
+}
+
+/* Label */
+.login .form-row label {
+    font-weight: 600;
+    color: #333;
+}
+
+/* Input */
+.login .form-row input {
+    width: 100%;
+    padding: 10px 12px;
+    margin-top: 5px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    transition: all 0.2s ease;
+}
+
+.login .form-row input:focus {
+    border-color: #1e88e5;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(30, 136, 229, 0.2);
+}
+
+/* Nút đăng nhập */
+.login .submit-row input {
+    width: 100%;
+    background: linear-gradient(135deg, #1e88e5, #26c6da);
+    border: none;
+    padding: 12px;
+    border-radius: 25px;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.login .submit-row input:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+/* Thông báo lỗi */
+.login .errornote {
+    border-radius: 8px;
+    background: #ffebee;
+    color: #c62828;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: none;
+}
+
+/* Footer */
+.login #footer {
+    text-align: center;
+    margin-top: 15px;
+    color: #eee;
+}
