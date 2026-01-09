@@ -1,46 +1,36 @@
-
-import Home from "./screens/Home/Home";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import Lessons from "./screens/Home/Lessons";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import Register from "./screens/User/Register";
-import Login from "./screens/User/Login";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Icon } from "react-native-paper";
-import { MyUserContext } from "./utils/MyContexts";
-import { useContext, useReducer } from "react";
-import MyUserReducer from "./reducers/MyUserReducer";
+import { useReducer } from "react";
+
+import Home from "./screens/Home/Home";
+import Services from "./screens/Home/Services";
+import ServiceDetails from "./screens/Home/ServiceDetails";
+
+import Login from "./screens/User/Login";
+import Register from "./screens/User/Register";
 import Profile from "./screens/User/User";
 
+import CreateBooking from "./screens/Booking/CreateBooking";
+import MyBookings from "./screens/Booking/MyBookings";
+
+import ProviderReport from "./screens/Report/ProviderReport";
+import AdminDashboard from "./screens/Report/AdminDashboard";
+
+import { MyUserContext } from "./utils/MyContexts";
+import MyUserReducer from "./reducers/MyUserReducer";
+
 const Stack = createNativeStackNavigator();
-
-const StackNavigator = () => {
-  return (
-    <Stack.Navigator screenOptions={{headerShown: false}}>
-      <Stack.Screen name="Course" component={Home} options={{title: 'Khóa học'}} />
-      <Stack.Screen name="Lesson" component={Lessons} options={{title: 'Bài học'}} />
-    </Stack.Navigator>
-  );
-}
-
 const Tab = createBottomTabNavigator();
-const TabNavigator = () => {
-  const [user, ] = useContext(MyUserContext);
 
-  return (
-    <Tab.Navigator>
-      <Tab.Screen name="Home" component={StackNavigator} options={{title: "Khóa học", tabBarIcon: () => <Icon source="home" size={30} color="blue" />}} />
-
-      {user === null?<>
-        <Tab.Screen name="Register" component={Register} options={{title: "Đăng ký", tabBarIcon: () => <Icon source="account" size={30} color="blue" />}} />
-        <Tab.Screen name="Login" component={Login} options={{title: "Đăng nhập", tabBarIcon: () => <Icon source="login" size={30} color="blue" />}} />
-      </>:<>
-        <Tab.Screen name="Profile" component={Profile} options={{title: "Người dùng", tabBarIcon: () => <Icon source="account" size={30} color="blue" />}} />
-      </>}
-      
-    </Tab.Navigator>
-  );
-}
+const HomeStack = () => (
+  <Stack.Navigator>
+    <Stack.Screen name="HomeMain" component={Home} options={{ title: "Dịch vụ" }} />
+    <Stack.Screen name="ServiceDetails" component={ServiceDetails} options={{ title: "Chi tiết dịch vụ" }} />
+    <Stack.Screen name="CreateBooking" component={CreateBooking} options={{ title: "Đặt dịch vụ" }} />
+  </Stack.Navigator>
+);
 
 const App = () => {
   const [user, dispatch] = useReducer(MyUserReducer, null);
@@ -48,7 +38,79 @@ const App = () => {
   return (
     <MyUserContext.Provider value={[user, dispatch]}>
       <NavigationContainer>
-        <TabNavigator />
+        <Tab.Navigator screenOptions={{ headerShown: false }}>
+          <Tab.Screen
+            name="Home"
+            component={HomeStack}
+            options={{
+              tabBarIcon: () => <Icon source="home" size={25} />,
+              title: "Trang chủ",
+            }}
+          />
+
+          {user === null ? (
+            <>
+              <Tab.Screen
+                name="Login"
+                component={Login}
+                options={{
+                  tabBarIcon: () => <Icon source="login" size={25} />,
+                  title: "Đăng nhập",
+                }}
+              />
+              <Tab.Screen
+                name="Register"
+                component={Register}
+                options={{
+                  tabBarIcon: () => <Icon source="account-plus" size={25} />,
+                  title: "Đăng ký",
+                }}
+              />
+            </>
+          ) : (
+            <>
+              <Tab.Screen
+                name="MyBookings"
+                component={MyBookings}
+                options={{
+                  tabBarIcon: () => <Icon source="clipboard-list" size={25} />,
+                  title: "Đơn đặt",
+                }}
+              />
+
+              {user.role === "PROVIDER" && (
+                <Tab.Screen
+                  name="ProviderReport"
+                  component={ProviderReport}
+                  options={{
+                    tabBarIcon: () => <Icon source="chart-bar" size={25} />,
+                    title: "Báo cáo",
+                  }}
+                />
+              )}
+
+              {user.is_staff && (
+                <Tab.Screen
+                  name="AdminDashboard"
+                  component={AdminDashboard}
+                  options={{
+                    tabBarIcon: () => <Icon source="view-dashboard" size={25} />,
+                    title: "Quản trị",
+                  }}
+                />
+              )}
+
+              <Tab.Screen
+                name="Profile"
+                component={Profile}
+                options={{
+                  tabBarIcon: () => <Icon source="account" size={25} />,
+                  title: "Tài khoản",
+                }}
+              />
+            </>
+          )}
+        </Tab.Navigator>
       </NavigationContainer>
     </MyUserContext.Provider>
   );
