@@ -1,12 +1,16 @@
 from django.contrib import messages
+from django.contrib.auth import authenticate, login
 from django.db.models import Count, Sum
 from django.db.models.functions import TruncYear, TruncMonth
 from django.shortcuts import redirect, render
-from rest_framework import viewsets, permissions, parsers
+from rest_framework import viewsets, permissions, parsers, serializers, mixins, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+
 from .perms import IsProvider, IsCustomer, IsOwner, ReadOnly
 from .form import SupplierRegisterForm
 from drf_yasg.utils import swagger_auto_schema
@@ -14,7 +18,7 @@ from drf_yasg import openapi
 from .throttles import ProviderRateThrottle
 
 from .models import (
-    Service, Booking, Review, Payment, Role, BookingTour, BookingHotel, BookingTransport, Invoice
+    Service, Booking, Review, Payment, Role, BookingTour, BookingHotel, BookingTransport, Invoice, User
 )
 from .serializers import (
     ServiceSerializer,
@@ -24,28 +28,36 @@ from .serializers import (
     BookingTransportSerializer, InvoiceSerializer,
 )
 
-# ================= ROLE =================
+
 class RoleView(viewsets.ReadOnlyModelViewSet):
     queryset = Role.objects.all()
     serializer_class = RoleSerializer
 
 
-# ================= USER =================
-class UserView(viewsets.ViewSet):
-    permission_classes = [permissions.IsAuthenticated]
-    parser_classes = [parsers.MultiPartParser]
+class UserView(viewsets.GenericViewSet, mixins.CreateModelMixin):
+    def get_permissions(self):
+        if self.action == "create":
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
 
-    @action(methods=['get', 'patch'], detail=False, url_path='me')
-    def me(self, request):
+    @action(
+        detail=False,
+        methods=['get', 'patch'],
+        url_path='current-user',
+        permission_classes=[IsAuthenticated]
+    )
+    def get_current_user(self, request):
         user = request.user
+
         if request.method == 'PATCH':
             serializer = UserSerializer(user, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
-        return Response(UserSerializer(user).data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-# ================= SERVICE =================
 class ServiceView(viewsets.ModelViewSet):
     serializer_class = ServiceSerializer
     throttle_classes = [ProviderRateThrottle]
@@ -82,7 +94,7 @@ class ServiceView(viewsets.ModelViewSet):
         return Response(ServiceSerializer(qs, many=True).data)
 
 
-# ================= BOOKING =================
+
 class BookingView(viewsets.ModelViewSet):
     serializer_class = BookingSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -104,7 +116,7 @@ class BookingView(viewsets.ModelViewSet):
             service.save()
 
 
-# ================= BOOKING DETAIL =================
+
 class BookingTourView(viewsets.ModelViewSet):
     queryset = BookingTour.objects.all()
     serializer_class = BookingTourSerializer
@@ -123,7 +135,7 @@ class BookingTransportView(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
-# ================= PAYMENT =================
+
 class PaymentView(viewsets.ModelViewSet):
     serializer_class = PaymentSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -144,7 +156,7 @@ class PaymentView(viewsets.ModelViewSet):
         )
 
 
-# ================= INVOICE =================
+
 class InvoiceView(viewsets.ReadOnlyModelViewSet):
     serializer_class = InvoiceSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -156,7 +168,7 @@ class InvoiceView(viewsets.ReadOnlyModelViewSet):
         return Invoice.objects.filter(booking__user=user)
 
 
-# ================= REVIEW =================
+
 class ReviewView(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     throttle_classes = [ProviderRateThrottle]
@@ -168,12 +180,18 @@ class ReviewView(viewsets.ModelViewSet):
             qs = qs.filter(service_id=service_id)
         return qs
 
+    # def get_permissions(self):
+    #     if self.action == 'create':
+    #         return [IsCustomer()]
+    #     if self.action in ['update', 'partial_update', 'destroy']:
+    #         return [IsOwner()]
+    #     return [ReadOnly()]
     def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [permissions.AllowAny()]
         if self.action == 'create':
             return [IsCustomer()]
-        if self.action in ['update', 'partial_update', 'destroy']:
-            return [IsOwner()]
-        return [ReadOnly()]
+        return [IsOwner()]
 
     def perform_destroy(self, instance):
         instance.active = False
@@ -182,7 +200,7 @@ class ReviewView(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
-# ================= REPORT =================
+
 class ProviderReportView(APIView):
     permission_classes = [IsProvider]
     throttle_classes = [ProviderRateThrottle]
@@ -291,9 +309,7 @@ class ProviderTimeReportView(APIView):
 
 
 def register_supplier(request):
-    """
-    Trang đăng ký nhà cung cấp (HTML FORM)
-    """
+
     if request.method == 'POST':
         form = SupplierRegisterForm(request.POST, request.FILES)
         if form.is_valid():
@@ -309,16 +325,28 @@ def register_supplier(request):
             user.is_verified = False
             user.save()
 
+
             messages.success(
                 request,
                 "Đăng ký thành công! Vui lòng chờ Admin duyệt tài khoản."
             )
-            return redirect('login')
+
+            return redirect('accounts')
+
     else:
         form = SupplierRegisterForm()
 
     return render(request, 'registration/register_supplier.html', {'form': form})
 
-
+def login_supplier(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user:
+            login(request, user)
+            return redirect('home')  # hoặc trang dashboard mong muốn
+        messages.error(request, "Tên đăng nhập hoặc mật khẩu không đúng")
+    return render(request, 'registration/login.html')
 def intro_supplier(request):
     return render(request, 'intro_supplier.html')

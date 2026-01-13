@@ -8,21 +8,26 @@ from pathlib import Path
 import pymysql
 import cloudinary
 
-# ========================
-# BASE DIR
-# ========================
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# ========================
-# SECURITY
-# ========================
+
 SECRET_KEY = 'django-insecure-p_6bt^gw6b*a)am(w20z9ql$ixlyi#wrhzv-c18yc4t5l%4bv$'
 DEBUG = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '192.168.1.5']
+from django.contrib.messages import constants as messages
 
-# ========================
-# APPLICATIONS
-# ========================
+MESSAGE_TAGS = {
+    messages.DEBUG: 'debug',
+    messages.INFO: 'info',
+    messages.SUCCESS: 'success',
+    messages.WARNING: 'warning',
+    messages.ERROR: 'danger',
+
+}
 INSTALLED_APPS = [
         'jazzmin',
     'django.contrib.admin',
@@ -41,26 +46,6 @@ INSTALLED_APPS = [
     'oauth2_provider',
 ]
 
-INSTALLED_APPS = [
-    'jazzmin',
-
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-
-    'tours.apps.ToursConfig',
-
-    'ckeditor',
-    'ckeditor_uploader',
-
-    'rest_framework',
-    'drf_yasg',
-
-    'oauth2_provider',
-]
 
 JAZZMIN_SETTINGS = {
 
@@ -170,7 +155,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'tourdb',
         'USER': 'root',
-        'PASSWORD': '123456',
+        'PASSWORD': 'root',
         'HOST': 'localhost',
         'PORT': '3306',
     }
@@ -190,13 +175,17 @@ TIME_ZONE = 'Asia/Ho_Chi_Minh'
 USE_I18N = True
 USE_TZ = True
 
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+
 
 STATIC_URL = 'static/'
 
 
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = '/image/'
+MEDIA_ROOT = BASE_DIR / 'image'
 
 CKEDITOR_UPLOAD_PATH = "images/ckeditors/"
 
@@ -225,6 +214,7 @@ REST_FRAMEWORK = {
         'user': '1000/hour',# user bình thường
         'provider': '300/hour',
     },
+    "PAGE_SIZE": 20,
 }
 
 
@@ -239,5 +229,5 @@ cloudinary.config(
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-CLIENT_ID = 'kOditntahpflHNyaUMLSstRc5KkmZHhN2P0wXf9T'
-CLIENT_SECRET = 'Ce79BktaI5NHf4YTf7jmzeARPSSrwA6qFPoTI714R4rWaGmzHvIrGD5pTNy83ZYNAzg11afpRWttldOA8npUQklkC6LhLn9sDVMyZ6N2HCVYBYsGY44RHzyDFOsELvHC'
+CLIENT_ID = 'DtgRSZeytDLDgEXv1GsG3pwhmJ4oudNFPDzPecZX'
+CLIENT_SECRET = 'cZKUY55lDKmBYRCvOImpmSdvYpnJFC4N50xPqijaZb8S7OPMh77wvGaAmEhzV4uYl8rc3UpCeIJnrQgUjvy064hkZshNWf0tcxbcVLKdiBe4Zrp5kMCbl9vLCqxqQ4qF'

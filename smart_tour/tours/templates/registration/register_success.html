@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng ký thành công!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .message-box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 450px;
+        }
+        h2 {
+            color: #2c3e50;
+        }
+        p {
+            margin: 15px 0;
+            font-size: 16px;
+        }
+        a.btn-login {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: #0984e3;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        a.btn-login:hover {
+            background: #045fa3;
+        }
+    </style>
+</head>
+<body>
+    <div class="message-box">
+        <h2>Đăng ký thành công!</h2>
+        <p>Cảm ơn <strong>{{ username }}</strong> đã đăng ký nhà cung cấp.</p>
+        <p>Vui lòng đợi admin duyệt tài khoản trước khi đăng nhập.</p>
+        <a class="btn-login" href="{% url 'admin:login' %}">Đến trang Đăng nhập Admin</a>
+    </div>
+</body>
+</html>

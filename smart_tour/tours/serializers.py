@@ -1,4 +1,7 @@
-from rest_framework import serializers
+from django.contrib.admin import action
+from oauth2_provider.contrib.rest_framework import permissions
+from requests import Response
+from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from .models import (
     User, Role, Service,
@@ -6,14 +9,12 @@ from .models import (
     Invoice, Review, Payment
 )
 
-# ================= ROLE =================
 class RoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Role
         fields = ['id', 'name']
 
 
-# ================= USER =================
 class UserSerializer(serializers.ModelSerializer):
     role = RoleSerializer(read_only=True)
     avatar = serializers.ImageField(required=False)
@@ -49,7 +50,6 @@ class UserSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-# ================= SERVICE =================
 class ServiceSerializer(serializers.ModelSerializer):
     provider = serializers.StringRelatedField(read_only=True)
 
@@ -58,6 +58,10 @@ class ServiceSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('provider', 'created_date', 'updated_date')
 
+    def get_image(self, obj):
+        if obj.image:
+            return obj.image.url
+        return None
 
 
 # ================= BOOKING =================

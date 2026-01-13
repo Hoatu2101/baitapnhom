@@ -1,57 +1,137 @@
-echo "=== cài đặt thư viện từ requirements.txt ==="
-pip install -r requirements.txt
+from django.utils import timezone
+from datetime import timedelta, date
+from accounts.models import User, Role
+from services.models import Service, Booking, BookingTour, BookingHotel, BookingTransport, Review, Payment, Invoice
 
-echo "=== Thực thi migrate cơ sở dữ liệu ==="
-python manage.py migrate
 
-echo "=== Tạo superuser ==="
-export DJANGO_SUPERUSER_USERNAME=admin
-export DJANGO_SUPERUSER_EMAIL=admin@example.com
-export DJANGO_SUPERUSER_PASSWORD=Admin@123
+customer_role, _ = Role.objects.get_or_create(name="CUSTOMER")
+provider_role, _ = Role.objects.get_or_create(name="PROVIDER")
 
-python manage.py createsuperuser --no-input || echo "SuperUser đã tồn tại!"
+provider, _ = User.objects.get_or_create(
+    username="provider1",
+    email="provider1@example.com",
+    defaults={
+        "role": provider_role,
+        "is_verified": True
+    }
+)
+provider.set_password("Provider@123")
+provider.save()
 
-echo "=== Chèn dữ liệu mẫu ==="
-python manage.py shell  <<EOF
-from courses.models import Category, Course
+customer, _ = User.objects.get_or_create(
+    username="customer1",
+    email="customer1@example.com",
+    defaults={
+        "role": customer_role,
+        "is_verified": True
+    }
+)
+customer.set_password("Customer@123")
+customer.save()
 
-c1, _ = Category.objects.get_or_create(name='Software Engineering')
-c2, _ = Category.objects.get_or_create(name='Artificial Intelligence')
-c3, _ = Category.objects.get_or_create(name='Data Sciences')
+# =========================
+# 3. SERVICES (do PROVIDER tạo)
+# =========================
+tour = Service.objects.create(
+    name="Hà Nội – Hạ Long 3N2Đ",
+    description="Tour du lịch Hạ Long cao cấp",
+    price=3500000,
+    start_date=timezone.now() + timedelta(days=7),
+    available_slots=20,
+    service_type="TOUR",
+    provider=provider
+)
 
-Course.objects.create(subject='Introduction to SE', description='demo', image='image/upload/v1709565062/rohn1l6xtpxedyqgyncs.png', category=c1)
-Course.objects.create(subject='Software Testing', description='demo', image='image/upload/v1709565062/rohn1l6xtpxedyqgyncs.png', category=c1)
-Course.objects.create(subject='Introduction to AI', description='demo', image='image/upload/v1709565062/rohn1l6xtpxedyqgyncs.png', category=c2)
-Course.objects.create(subject='Machine Learning', description='demo', image='image/upload/v1709565062/rohn1l6xtpxedyqgyncs.png', category=c1)
-Course.objects.create(subject='Deep Learning', description='demo', image='image/upload/v1709565062/rohn1l6xtpxedyqgyncs.png', category=c1)
-Course.objects.create(subject='Computer Vision', description='demo', image='image/upload/v1709565062/rohn1l6xtpxedyqgyncs.png', category=c1)
-Course.objects.create(subject='Natural Language Processing', description='demo', image='image/upload/v1709565062/rohn1l6xtpxedyqgyncs.png', category=c1)
-Course.objects.create(subject='Python Programming', description='demo', image='dxxwcby8l/image/upload/v1709565062/rohn1l6xtpxedyqgyncs.png', category=c3)
-Course.objects.create(subject='Data Analysis', description='demo', image='dxxwcby8l/image/upload/v1709565062/rohn1l6xtpxedyqgyncs.png', category=c3)
-Course.objects.create(subject='Data Mining', description='demo', image='dxxwcby8l/image/upload/v1709565062/rohn1l6xtpxedyqgyncs.png', category=c3)
-Course.objects.create(subject='Using Power BI', description='demo', image='dxxwcby8l/image/upload/v1709565062/rohn1l6xtpxedyqgyncs.png', category=c3)
+hotel = Service.objects.create(
+    name="Khách sạn 5 sao Đà Nẵng",
+    description="Khách sạn ven biển",
+    price=1800000,
+    start_date=timezone.now() + timedelta(days=5),
+    available_slots=10,
+    service_type="HOTEL",
+    provider=provider
+)
 
-t1, _ = Tag.objects.get_or_create(name='techniques')
-t2, _ = Tag.objects.get_or_create(name='software')
-t3, _ = Tag.objects.get_or_create(name='programming')
+transport = Service.objects.create(
+    name="Xe limousine Sài Gòn – Đà Lạt",
+    description="Xe limousine cao cấp",
+    price=450000,
+    start_date=timezone.now() + timedelta(days=3),
+    available_slots=15,
+    service_type="TRANSPORT",
+    provider=provider
+)
 
-l1 = Lesson.objects.create(subject='SE Overview', content='Demo', image='https://res.cloudinary.com/dxxwcby8l/image/upload/v1709565062/rohn1l6xtpxedyqgyncs.png', course=co1)
-l1.tags.add(t1)
-l1.tags.add(t2)
-l1.save()
-l2 = Lesson.objects.create(subject='Software Analysis', content='Demo', image='https://res.cloudinary.com/dxxwcby8l/image/upload/v1709565062/rohn1l6xtpxedyqgyncs.png', course=co1)
-l2.tags.add(t2)
-l2.tags.add(t3)
-l2.save()
-l3 = Lesson.objects.create(subject='Software Design', content='Demo', image='https://res.cloudinary.com/dxxwcby8l/image/upload/v1709565062/rohn1l6xtpxedyqgyncs.png', course=co1)
-l3.tags.add(t1)
-l3.tags.add(t2)
-l3.tags.add(t3)
-l3.save()
-l4 = Lesson.objects.create(subject='Black-box Testing', content='Demo', image='https://res.cloudinary.com/dxxwcby8l/image/upload/v1709565062/rohn1l6xtpxedyqgyncs.png', course=co2)
-l5 = Lesson.objects.create(subject='White-box Testing', content='Demo', image='https://res.cloudinary.com/dxxwcby8l/image/upload/v1709565062/rohn1l6xtpxedyqgyncs.png', course=co2)
 
-EOF
+booking_tour = Booking.objects.create(
+    user=customer,
+    service=tour,
+    booking_date=timezone.now(),
+    description="Đặt tour cho gia đình"
+)
 
-echo "=== Chạy server Django ==="
-python manage.py runserver
+BookingTour.objects.create(
+    booking=booking_tour,
+    departure_date=date.today() + timedelta(days=7),
+    return_date=date.today() + timedelta(days=9),
+    transport="Xe du lịch",
+    hotel_name="Vinpearl Hạ Long"
+)
+
+booking_hotel = Booking.objects.create(
+    user=customer,
+    service=hotel,
+    booking_date=timezone.now()
+)
+
+BookingHotel.objects.create(
+    booking=booking_hotel,
+    hotel_name="InterContinental Đà Nẵng",
+    check_in=date.today() + timedelta(days=5),
+    check_out=date.today() + timedelta(days=7)
+)
+
+booking_transport = Booking.objects.create(
+    user=customer,
+    service=transport,
+    booking_date=timezone.now()
+)
+
+BookingTransport.objects.create(
+    booking=booking_transport,
+    transport_type="Limousine",
+    departure_date=date.today() + timedelta(days=3)
+)
+
+# =========================
+# 5. PAYMENT
+# =========================
+Payment.objects.create(
+    booking=booking_tour,
+    method="MOMO",
+    amount=tour.price,
+    is_paid=True,
+    transaction_id="MOMO123456"
+)
+
+# =========================
+# 6. INVOICE
+# =========================
+Invoice.objects.create(
+    invoice_code="INV-001",
+    booking=booking_tour,
+    payment_date=timezone.now(),
+    total_amount=tour.price
+)
+
+# =========================
+# 7. REVIEW
+# =========================
+Review.objects.create(
+    user=customer,
+    service=tour,
+    rating=5,
+    comment="Dịch vụ rất tốt, sẽ quay lại!"
+)
+
+print("✅ Đã tạo xong dữ liệu mẫu: ROLE, USER, SERVICE, BOOKING, PAYMENT")

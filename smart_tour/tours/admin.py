@@ -4,13 +4,15 @@ from django.contrib import admin
 from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin, GroupAdmin
 from django.db.models import Avg
+from django.urls import reverse
+from django.utils.html import format_html
 
 from .models import User, Role, Service, Booking, BookingTour, BookingHotel, BookingTransport, Invoice, Review
 
 def filter_by_provider(qs, request, lookup):
     if request.user.is_superuser:
         return qs
-    if request.user.role and request.user.role.name == 'Nhà cung cấp':
+    if request.user.role and request.user.role.name == 'PROVIDER':
         return qs.filter(**{lookup: request.user})
     return qs.none()
 
@@ -33,14 +35,41 @@ class UserAdmin(DjangoUserAdmin):
         ('Ngày quan trọng', {'fields': ('last_login', 'date_joined')}),
     )
     filter_horizontal = ('groups', 'user_permissions')
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        if request.user.role and request.user.role.name == 'PROVIDER':
+            return qs.filter(id=request.user.id)
+        return qs.none()
 
-
+    def has_module_permission(self, request):
+        return request.user.is_superuser
+def avatar_tag(self, obj):
+    if obj.avatar and hasattr(obj.avatar, 'url'):
+        try:
+            url = reverse('myadmin:accounts_user_change', args=[obj.pk])
+            return format_html('<a href="{}"><img src="{}" width="50" height="50" style="border-radius:50%;"/></a>', url, obj.avatar.url)
+        except:
+            return format_html('<img src="{}" width="50" height="50" style="border-radius:50%;"/>', obj.avatar.url)
+    return "-"
+avatar_tag.short_description = "Avatar"
 class ServiceAdminForm(forms.ModelForm):
     description = forms.CharField(widget=CKEditorUploadingWidget())
     class Meta:
         model = Service
         fields = '__all__'
+    def clean_price(self):
+        price = self.cleaned_data.get('price')
+        if price is not None and price < 0:
+            raise forms.ValidationError("Giá phải >= 0")
+        return price
 
+    def clean_available_slots(self):
+        slots = self.cleaned_data.get('available_slots')
+        if slots is not None and slots < 0:
+            raise forms.ValidationError("Số lượng phải >= 0")
+        return slots
 
 class ReviewInline(admin.TabularInline):
     model = Review
@@ -54,11 +83,40 @@ class ReviewInline(admin.TabularInline):
 
 class ServiceAdmin(admin.ModelAdmin):
     form = ServiceAdminForm
-    inlines = [ReviewInline]
-    list_display = ('id', 'name', 'service_type', 'price', 'available_slots', 'provider', 'avg_rating', 'review_count')
+    list_display = (
+        'id', 'name', 'service_type', 'price',
+        'available_slots', 'avg_rating', 'review_count', 'provider'
+    )
     list_filter = ('service_type', 'active')
     search_fields = ('name', 'provider__username')
     change_list_template = "admin/tours/services/change_list.html"
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return filter_by_provider(qs, request, 'provider')
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        if not request.user.is_superuser:
+            form.base_fields.pop('provider', None)
+        return form
+
+    def save_model(self, request, obj, form, change):
+        if not change:
+            if not request.user.is_verified:
+                raise PermissionError("Nhà cung cấp chưa được duyệt")
+            obj.provider = request.user
+        super().save_model(request, obj, form, change)
+
+    def avg_rating(self, obj):
+        avg = obj.reviews.aggregate(Avg('rating'))['rating__avg']
+        return round(avg, 1) if avg else 'Chưa có'
+    avg_rating.short_description = "Đánh giá TB"
+
+    def review_count(self, obj):
+        return obj.reviews.count()
+    review_count.short_description = "Số đánh giá"
+
     def changelist_view(self, request, extra_context=None):
         qs = self.get_queryset(request)
         chart_labels = []
@@ -75,25 +133,9 @@ class ServiceAdmin(admin.ModelAdmin):
         extra_context['chart_booking_counts'] = chart_booking_counts
         extra_context['chart_revenues'] = chart_revenues
         return super().changelist_view(request, extra_context=extra_context)
-    def avg_rating(self, obj):
-        avg = obj.reviews.aggregate(Avg('rating'))['rating__avg']
-        return round(avg, 1) if avg else 'Chưa có'
-    avg_rating.short_description = "Đánh giá TB"
 
-    def review_count(self, obj):
-        return obj.reviews.count()
-    review_count.short_description = "Số đánh giá"
 
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        return filter_by_provider(qs, request, 'provider')
 
-    def save_model(self, request, obj, form, change):
-        if not change:
-            if not request.user.is_verified:
-                raise PermissionError("Nhà cung cấp chưa được duyệt")
-            obj.provider = request.user
-        super().save_model(request, obj, form, change)
 
 
 class BookingTourInline(admin.StackedInline):
@@ -123,19 +165,19 @@ class BookingAdmin(admin.ModelAdmin):
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'service':
-            if request.user.role and request.user.role.name == 'Nhà cung cấp':
+            if request.user.role and request.user.role.name == 'PROVIDER':
                 kwargs['queryset'] = Service.objects.filter(provider=request.user)
         if db_field.name == 'user':
             kwargs['queryset'] = User.objects.all()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
     def get_list_filter(self, request):
-        if request.user.role and request.user.role.name == 'Nhà cung cấp':
+        if request.user.role and request.user.role.name == 'PROVIDER':
             return ('active', 'booking_date',)
         return self.list_filter
 
     def get_search_results(self, request, queryset, search_term):
         queryset, use_distinct = super().get_search_results(request, queryset, search_term)
-        if request.user.role and request.user.role.name == 'Nhà cung cấp':
+        if request.user.role and request.user.role.name == 'PROVIDER':
             queryset = queryset.filter(service__provider=request.user)
         return queryset, use_distinct
 
@@ -151,18 +193,18 @@ class InvoiceAdmin(admin.ModelAdmin):
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'booking':
-            if request.user.role and request.user.role.name == 'Nhà cung cấp':
+            if request.user.role and request.user.role.name == 'PROVIDER':
                 kwargs['queryset'] = Booking.objects.filter(service__provider=request.user)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_list_filter(self, request):
-        if request.user.role and request.user.role.name == 'Nhà cung cấp':
+        if request.user.role and request.user.role.name == 'PROVIDER':
             return ('payment_date',)
         return self.list_filter
 
     def get_search_results(self, request, queryset, search_term):
         queryset, use_distinct = super().get_search_results(request, queryset, search_term)
-        if request.user.role and request.user.role.name == 'Nhà cung cấp':
+        if request.user.role and request.user.role.name == 'PROVIDER':
             queryset = queryset.filter(booking__service__provider=request.user)
         return queryset, use_distinct
 
