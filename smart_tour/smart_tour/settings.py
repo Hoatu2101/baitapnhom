@@ -18,7 +18,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ========================
 SECRET_KEY = 'django-insecure-p_6bt^gw6b*a)am(w20z9ql$ixlyi#wrhzv-c18yc4t5l%4bv$'
 DEBUG = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '192.168.1.13']
 
 # ========================
 # APPLICATIONS
@@ -195,8 +198,8 @@ STATIC_URL = 'static/'
 
 
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = '/image/'
+MEDIA_ROOT = BASE_DIR / 'image'
 
 CKEDITOR_UPLOAD_PATH = "images/ckeditors/"
 
@@ -225,6 +228,7 @@ REST_FRAMEWORK = {
         'user': '1000/hour',# user bình thường
         'provider': '300/hour',
     },
+    "PAGE_SIZE": 20,
 }
 
 

@@ -58,6 +58,10 @@ class ServiceSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('provider', 'created_date', 'updated_date')
 
+    def get_image(self, obj):
+        if obj.image:
+            return obj.image.url
+        return None
 
 
 # ================= BOOKING =================

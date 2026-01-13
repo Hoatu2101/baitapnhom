@@ -35,6 +35,11 @@ class UserView(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
     parser_classes = [parsers.MultiPartParser]
 
+    def get_permissions(self):
+        if self.action == "create":
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
+
     @action(methods=['get', 'patch'], detail=False, url_path='me')
     def me(self, request):
         user = request.user
@@ -168,12 +173,18 @@ class ReviewView(viewsets.ModelViewSet):
             qs = qs.filter(service_id=service_id)
         return qs
 
+    # def get_permissions(self):
+    #     if self.action == 'create':
+    #         return [IsCustomer()]
+    #     if self.action in ['update', 'partial_update', 'destroy']:
+    #         return [IsOwner()]
+    #     return [ReadOnly()]
     def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [permissions.AllowAny()]
         if self.action == 'create':
             return [IsCustomer()]
-        if self.action in ['update', 'partial_update', 'destroy']:
-            return [IsOwner()]
-        return [ReadOnly()]
+        return [IsOwner()]
 
     def perform_destroy(self, instance):
         instance.active = False
