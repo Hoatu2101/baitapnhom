@@ -1,10 +1,12 @@
+from django.utils import timezone
 from django.contrib import messages
 from django.db.models import Count, Sum
 from django.db.models.functions import TruncYear, TruncMonth
 from django.shortcuts import redirect, render
-from rest_framework import viewsets, permissions, parsers
+from rest_framework import viewsets, permissions, parsers, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .perms import IsProvider, IsCustomer, IsOwner, ReadOnly
@@ -49,9 +51,24 @@ class UserView(viewsets.ViewSet):
             serializer.save()
         return Response(UserSerializer(user).data)
 
+    @action(detail=False, methods=['get'])
+    def current_user(self, request):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
+
+class RegisterView(APIView):
+    permission_classes = [AllowAny]
+    parser_classes = [parsers.MultiPartParser, parsers.FormParser]
+
+    def post(self, request):
+        serializer = UserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 # ================= SERVICE =================
 class ServiceView(viewsets.ModelViewSet):
+    queryset = Service.objects.filter(active=True).order_by('-created_date')
     serializer_class = ServiceSerializer
     throttle_classes = [ProviderRateThrottle]
 
@@ -143,7 +160,11 @@ class PaymentView(viewsets.ModelViewSet):
         if booking.user != self.request.user:
             raise ValidationError("Không thể thanh toán booking của người khác")
 
+        if Payment.objects.filter(booking=booking).exists():
+            raise ValidationError("Booking này đã được thanh toán")
+
         serializer.save(
+            method='CASH',
             amount=booking.service.price,
             is_paid=True
         )

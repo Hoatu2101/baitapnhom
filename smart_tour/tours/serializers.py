@@ -51,12 +51,25 @@ class UserSerializer(serializers.ModelSerializer):
 
 # ================= SERVICE =================
 class ServiceSerializer(serializers.ModelSerializer):
-    provider = serializers.StringRelatedField(read_only=True)
+    image = serializers.SerializerMethodField()
+    provider = serializers.StringRelatedField()
 
     class Meta:
         model = Service
-        fields = '__all__'
-        read_only_fields = ('provider', 'created_date', 'updated_date')
+        fields = [
+            'id',
+            'provider',
+            'active',
+            'created_date',
+            'updated_date',
+            'name',
+            'description',
+            'image',
+            'price',
+            'start_date',
+            'available_slots',
+            'service_type',
+        ]
 
     def get_image(self, obj):
         if obj.image:
@@ -162,10 +175,33 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class PaymentSerializer(serializers.ModelSerializer):
+    booking_id = serializers.PrimaryKeyRelatedField(
+        queryset=Booking.objects.all(),
+        write_only=True,
+        source='booking'
+    )
+
+    booking = serializers.PrimaryKeyRelatedField(read_only=True)
+    method = serializers.CharField(read_only=True)
+
     class Meta:
         model = Payment
-        fields = '__all__'
-        read_only_fields = ('is_paid', 'transaction_id')
+        fields = [
+            'id',
+            'booking',
+            'booking_id',
+            'method',
+            'amount',
+            'is_paid',
+            'created_date'
+        ]
+        read_only_fields = (
+            'booking',
+            'method',
+            'amount',
+            'is_paid',
+            'created_date'
+        )
 
 
 class ProviderServiceReportSerializer(serializers.Serializer):

@@ -27,24 +27,6 @@ ALLOWED_HOSTS = [
 # APPLICATIONS
 # ========================
 INSTALLED_APPS = [
-        'jazzmin',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-
-    'tours.apps.ToursConfig',
-
-    'ckeditor',
-    'ckeditor_uploader',
-    'rest_framework',
-    'drf_yasg',
-    'oauth2_provider',
-]
-
-INSTALLED_APPS = [
     'jazzmin',
 
     'django.contrib.admin',
@@ -215,6 +197,7 @@ CKEDITOR_CONFIGS = {
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',

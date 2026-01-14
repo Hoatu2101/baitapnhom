@@ -4,6 +4,7 @@ from django.contrib import admin
 from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin, GroupAdmin
 from django.db.models import Avg
+from django.utils.html import format_html
 
 from .models import User, Role, Service, Booking, BookingTour, BookingHotel, BookingTransport, Invoice, Review
 
@@ -180,6 +181,16 @@ class ReviewAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         return filter_by_provider(qs, request, 'service__provider')
+
+def image_preview(self, obj):
+    if obj.image:
+        return format_html(
+            '<img src="{}" width="120" style="border-radius:6px" />',
+            obj.image.url
+        )
+    return "Chưa có ảnh"
+
+image_preview.short_description = "Hình ảnh"
 
 
 class MyAdminSite(admin.AdminSite):
