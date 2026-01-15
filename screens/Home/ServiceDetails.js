@@ -98,7 +98,6 @@ export default function ServiceDetails({ route, navigation }) {
         <Card.Content>
           <Text variant="titleLarge">{service.name}</Text>
 
-          {/* Clean HTML description */}
           <RenderHTML
             contentWidth={300}
             source={{ html: service.description }}
@@ -110,7 +109,6 @@ export default function ServiceDetails({ route, navigation }) {
         </Card.Content>
       </Card>
 
-      {/* ĐẶT DỊCH VỤ – CHẶN KHI CHƯA LOGIN */}
       <Button
         mode="contained"
         style={{ margin: 10 }}
@@ -123,7 +121,6 @@ export default function ServiceDetails({ route, navigation }) {
         Đặt dịch vụ
       </Button>
 
-      {/* COMMENT */}
       <Card style={{ margin: 10 }}>
         <Card.Content>
           <Text variant="titleMedium">Bình luận</Text>

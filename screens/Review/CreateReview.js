@@ -11,11 +11,13 @@ export default function CreateReview({ route }) {
   const submit = async () => {
     let token = await AsyncStorage.getItem("token");
     try {
-      await authApis(token).post(endpoints.reviews, {
-        service: serviceId,
-        content,
-        rating: parseInt(rating),
+      await authApis(token).post("/api/reviews/", {
+        service_id: serviceId,
+        rating: Number(rating),  
+        comment: comment.trim()
       });
+
+
       alert("Đánh giá thành công");
     } catch (err) {
       console.log(err);

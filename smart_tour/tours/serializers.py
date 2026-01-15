@@ -76,11 +76,61 @@ class ServiceSerializer(serializers.ModelSerializer):
             return obj.image.url
         return None
 
+class PaymentSerializer(serializers.ModelSerializer):
+    booking_id = serializers.PrimaryKeyRelatedField(
+        queryset=Booking.objects.all(),
+        write_only=True,
+        source='booking'
+    )
+
+    booking = serializers.PrimaryKeyRelatedField(read_only=True)
+    method = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = Payment
+        fields = [
+            'id',
+            'booking',
+            'booking_id',
+            'method',
+            'amount',
+            'is_paid',
+            'created_date'
+        ]
+        read_only_fields = (
+            'booking',
+            'method',
+            'amount',
+            'is_paid',
+            'created_date'
+        )
+
+class PaymentMiniSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = ['id', 'method', 'amount', 'is_paid', 'created_date']
+
 
 # ================= BOOKING =================
+# class BookingSerializer(serializers.ModelSerializer):
+#     user = UserSerializer(read_only=True)
+#     service = ServiceSerializer(read_only=True)
+#     service_id = serializers.PrimaryKeyRelatedField(
+#         queryset=Service.objects.all(),
+#         write_only=True,
+#         source='service'
+#     )
+#
+#     class Meta:
+#         model = Booking
+#         fields = '__all__'
+#         read_only_fields = ('user', 'created_date')
+
 class BookingSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     service = ServiceSerializer(read_only=True)
+    payment = PaymentMiniSerializer(read_only=True)
+
     service_id = serializers.PrimaryKeyRelatedField(
         queryset=Service.objects.all(),
         write_only=True,
@@ -153,55 +203,43 @@ class InvoiceSerializer(serializers.ModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
+
     service_id = serializers.PrimaryKeyRelatedField(
         queryset=Service.objects.all(),
         write_only=True,
         source='service'
     )
 
+    rating = serializers.IntegerField(min_value=1, max_value=5)
+
     class Meta:
         model = Review
         fields = '__all__'
         read_only_fields = ('user', 'created_date')
 
-    def validate(self, data):
-        user = self.context['request'].user
-        service = data['service']
+    def validate(self, attrs):
+        request = self.context['request']
+        user = request.user
+        service = attrs.get('service')
+
+        if not service:
+            raise ValidationError({"service_id": "Thiếu service_id"})
+
+        booking = Booking.objects.filter(
+            user=user,
+            service=service
+        ).select_related('payment').first()
+
+        if not booking:
+            raise ValidationError("Bạn chưa đặt dịch vụ này")
+
+        if not hasattr(booking, 'payment') or not booking.payment.is_paid:
+            raise ValidationError("Bạn cần thanh toán trước khi bình luận")
+
         if Review.objects.filter(user=user, service=service).exists():
-            raise ValidationError("Đã đánh giá rồi")
-        if not Booking.objects.filter(user=user, service=service).exists():
-            raise ValidationError("Bạn chưa sử dụng dịch vụ này")
-        return data
+            raise ValidationError("Bạn đã đánh giá dịch vụ này rồi")
 
-
-class PaymentSerializer(serializers.ModelSerializer):
-    booking_id = serializers.PrimaryKeyRelatedField(
-        queryset=Booking.objects.all(),
-        write_only=True,
-        source='booking'
-    )
-
-    booking = serializers.PrimaryKeyRelatedField(read_only=True)
-    method = serializers.CharField(read_only=True)
-
-    class Meta:
-        model = Payment
-        fields = [
-            'id',
-            'booking',
-            'booking_id',
-            'method',
-            'amount',
-            'is_paid',
-            'created_date'
-        ]
-        read_only_fields = (
-            'booking',
-            'method',
-            'amount',
-            'is_paid',
-            'created_date'
-        )
+        return attrs
 
 
 class ProviderServiceReportSerializer(serializers.Serializer):

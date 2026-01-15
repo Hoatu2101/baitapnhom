@@ -183,9 +183,41 @@ class InvoiceView(viewsets.ReadOnlyModelViewSet):
 
 
 # ================= REVIEW =================
+# class ReviewView(viewsets.ModelViewSet):
+#     serializer_class = ReviewSerializer
+#     throttle_classes = [ProviderRateThrottle]
+#
+#     def get_queryset(self):
+#         qs = Review.objects.filter(active=True)
+#         service_id = self.request.query_params.get('service_id')
+#         if service_id:
+#             qs = qs.filter(service_id=service_id)
+#         return qs
+#
+#     # def get_permissions(self):
+#     #     if self.action == 'create':
+#     #         return [IsCustomer()]
+#     #     if self.action in ['update', 'partial_update', 'destroy']:
+#     #         return [IsOwner()]
+#     #     return [ReadOnly()]
+#     def get_permissions(self):
+#         if self.action in ['list', 'retrieve']:
+#             return [permissions.AllowAny()]
+#         if self.action == 'create':
+#             return [IsCustomer()]
+#         return [IsOwner()]
+#
+#     def perform_destroy(self, instance):
+#         instance.active = False
+#         instance.save()
+#
+#
+#     def perform_create(self, serializer):
+#         serializer.save(user=self.request.user)
+
 class ReviewView(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    throttle_classes = [ProviderRateThrottle]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
         qs = Review.objects.filter(active=True)
@@ -194,26 +226,15 @@ class ReviewView(viewsets.ModelViewSet):
             qs = qs.filter(service_id=service_id)
         return qs
 
-    # def get_permissions(self):
-    #     if self.action == 'create':
-    #         return [IsCustomer()]
-    #     if self.action in ['update', 'partial_update', 'destroy']:
-    #         return [IsOwner()]
-    #     return [ReadOnly()]
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
             return [permissions.AllowAny()]
-        if self.action == 'create':
-            return [IsCustomer()]
-        return [IsOwner()]
-
-    def perform_destroy(self, instance):
-        instance.active = False
-        instance.save()
+        return [permissions.IsAuthenticated()]
 
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
 # ================= REPORT =================
 class ProviderReportView(APIView):
     permission_classes = [IsProvider]

@@ -133,4 +133,3 @@ const CreateBooking = ({ route, navigation }) => {
 };
 
 export default CreateBooking;
-

@@ -5,3 +5,7 @@ class ItemPaginator(pagination.PageNumberPagination):
 
 class ServicePaginator(pagination.PageNumberPagination):
     page_size = 20
+
+
+class ReviewPagination(pagination.PageNumberPagination):
+    page_size = 10

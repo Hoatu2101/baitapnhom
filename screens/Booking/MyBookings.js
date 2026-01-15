@@ -15,11 +15,7 @@ const MyBookings = () => {
       const token = await AsyncStorage.getItem("token");
       const res = await authApis(token).get(endpoints.myBookings);
 
-      const safeData = res.data.filter(
-        b => b && b.id && b.service
-      );
-
-      setBookings(safeData);
+      setBookings(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       Alert.alert("Lỗi", "Không tải được danh sách đơn đặt");
     } finally {
@@ -32,51 +28,45 @@ const MyBookings = () => {
   }, []);
 
   const renderItem = ({ item }) => {
-    if (!item || !item.service) return null;
+  const serviceName = item.service?.name ?? "Dịch vụ";
+  const price = Number(item.service?.price ?? 0);
+  const isPaid = item.payment?.is_paid === true;
 
-    const isPaid = !!item.payment; 
-    return (
-      <Card style={MyStyles.margin}>
-        <Card.Content>
-          <Text style={{ fontSize: 16, fontWeight: "bold" }}>
-            {item.service.name}
-          </Text>
+  return (
+    <Card style={MyStyles.margin}>
+      <Card.Content>
+        <Text style={{ fontSize: 16, fontWeight: "bold" }}>
+          {serviceName}
+        </Text>
 
-          <Text>
-            Giá: {item.service.price?.toLocaleString()} VNĐ
-          </Text>
+        <Text>Giá: {price.toLocaleString()} VNĐ</Text>
 
-          <Text>
-            Trạng thái: {isPaid ? "Đã thanh toán" : "Chưa thanh toán"}
-          </Text>
-        </Card.Content>
+        <Text>
+          Trạng thái: {isPaid ? "Đã thanh toán" : "Chưa thanh toán"}
+        </Text>
+      </Card.Content>
 
-        {!isPaid && (
-          <Card.Actions>
-            <Button
-              mode="contained"
-              onPress={() =>
-                Alert.alert(
-                  "Thanh toán",
-                  "Vui lòng thanh toán tại màn hình thanh toán",
-                  [{ text: "OK" }]
-                )
-              }
-            >
-              Chưa thanh toán
-            </Button>
-          </Card.Actions>
-        )}
-      </Card>
-    );
-  };
+      {!isPaid && (
+        <Card.Actions>
+          <Button onPress={() =>
+            navigation.navigate("Payment", { bookingId: item.id })
+          }>
+            Thanh toán
+          </Button>
+        </Card.Actions>
+      )}
+    </Card>
+  );
+};
+
+
 
   return (
     <FlatList
       data={bookings}
       refreshing={loading}
       onRefresh={load}
-      keyExtractor={(item) => String(item.id)} 
+      keyExtractor={(item) => String(item.id)}
       renderItem={renderItem}
       ListEmptyComponent={
         <View style={{ padding: 20 }}>

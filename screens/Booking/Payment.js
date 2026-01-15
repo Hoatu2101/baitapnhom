@@ -13,8 +13,18 @@ const Payment = ({ route, navigation }) => {
         booking_id: bookingId
       });
 
-      Alert.alert("Thành công", "Thanh toán thành công!");
-      navigation.navigate("MyBookings");
+      // Alert.alert("Thành công", "Thanh toán thành công!");
+      // navigation.navigate("MyBookings");
+      Alert.alert("Thành công", "Thanh toán thành công!", [
+        {
+          text: "OK",
+          onPress: () => navigation.reset({
+            index: 0,
+            routes: [{ name: "MyBookings" }]
+          })
+        }
+      ]);
+
     } catch (e) {
       Alert.alert("Lỗi", "Thanh toán thất bại");
     }
